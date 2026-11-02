@@ -1,14 +1,14 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include <vector>     // STL vector
+#include <vector>// STL vector
 
-
-using std::vector;    // from here, "vector" means std::vector
+using std::vector;
 
 /**
- * @brief A template class that wraps std::vector and shows only what the programme needs:
- * Insert, Delete, operator[] and Size. (Your Vector2, renamed Vector so Metlog compiles unchanged.)
+ * @brief A template class that uses std::vector
+ * Insert, Delete, operator[] and Size.
+ * This vector is used for Stats.h to store calculated values
  * @tparam T the type of element stored
  */
 template <class T>
@@ -30,13 +30,17 @@ class Vector
 };
 
 template <class T>
-Vector<T>::Vector() : m_vector(), m_size( 0 )
+Vector<T>::Vector()
 {
+    m_vector = vector<T>();
+    m_size=0;
 }
 
 template <class T>
-Vector<T>::Vector( int n ) : m_vector(), m_size( 0 )
+Vector<T>::Vector( int n )
 {
+    m_vector = vector<T>();
+    m_size=0;
     for (int counter = 0; counter < n; counter++) // runs 0 times if n is 0 or negative
     {
         m_vector.push_back( T() );
@@ -74,17 +78,17 @@ bool Vector<T>::Delete( int pos )
     return true;
 }
 
+// pos must be from 0 to Size() - 1(n-1)
 template <class T>
 const T & Vector<T>::operator[]( int pos ) const
 {
-    assert( pos >= 0 && pos < m_size );
     return m_vector[pos];
 }
 
+// pos must be from 0 to Size() - 1
 template <class T>
 T & Vector<T>::operator[]( int pos )
 {
-    assert( pos >= 0 && pos < m_size );
     return m_vector[pos];
 }
 
