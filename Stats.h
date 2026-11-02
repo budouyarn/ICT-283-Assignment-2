@@ -18,14 +18,6 @@ double Mean( const Vector<double> & values );
 double StdDev( const Vector<double> & values );
 
 /**
- * @brief Mean Absolute Deviation of ungrouped data: the mean of |x - mean|.
- * It works on plain numbers, so it knows nothing about weather data.
- * @param values: the numbers
- * @return the mean absolute deviation, 0 if there are no values
- */
-double Mad( const Vector<double> & values );
-
-/**
  * @brief Pearson Correlation Coefficient between two sets of values, matched pair by pair
  * Result is between -1 (perfect opposite) and +1 (perfect match), 0 means no straight-line relationship.
  *
