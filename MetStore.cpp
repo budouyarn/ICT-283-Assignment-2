@@ -1,137 +1,226 @@
-#ifndef METRECTYPE_H
-#define METRECTYPE_H
-/**
- * contains  meteorological record:
- * -the date and time a reading was taken,
- * -wind speed (km/h)
- * - ambient air temperature (degrees C) and
- * -solar radiation (W/m2) recorded at that moment.
- * Any of the three
- * measurements can be flagged as missing when the sensor gave no value.
- *
- * @class MetRecType
- * @author  Lim Wen Xin Sherine
- * @version 1.0
- * @date 05/10/2026
- *
- *
- *
- *
- *
- */
-#include "Date.h"
-#include "Time.h"
+#include "MetStore.h"
+#include "Stats.h"
+#include <algorithm>
+#include <vector>
 
-const float MISSING_SPEED = -1.0f;
-//mark a missing/offline-sensor reading:
-// acts as the marker for "sensor offline".
-//A blank or N/A speed is stored as -1 rather than 0, because 0 km/h is a real reading (calm air) and would be counted wrongly in the mean.
-const float MISSING_TEMP  = -999.0f; //Temperature can  be -1 °C, so -1 value could become a  real cold reading  and not a missed value
-const float MISSING_SOLAR = -1.0f;// same as MISSING_SPEED
-
-class MetRecType
+// ---------------------------------------------------------------------------------------------
+// The call-back that collects figures while a tree is traversed.
+// A Bst calls a plain function once per reading, and a plain function cannot carry data with it,
+// so the collected figures live in static members. That makes this code single-threaded only,
+// and Start() must be called before every traversal.
+// ---------------------------------------------------------------------------------------------
+namespace
 {
-    public:
-        /**
-         * @brief Default constructor. Required because Vector<T>'s own
-         * default constructor does `new T[m_capacity]`, which needs T
-         * to be default-constructed.
-         */
-        MetRecType();
+    const double HOURS_PER_READING = 10.0 / 60.0;                      // one reading is the average power over 10 minutes
 
-        /**
-         * @brief Builds a complete record with the required groups.
-         * @param date:the date of this reading
-         * @param time:the time of this reading
-         * @param speed: the wind speed in km/h, or MISSING_SPEED if the
-         * sensor was offline for this reading.
-         */
-        MetRecType( const Date & date, const Time & time, float speed );
+    class Gatherer
+    {
+        public:
+            static void Start()
+            {
+                s_speeds = Vector<double>();
+                s_temperatures = Vector<double>();
+                s_solars = Vector<double>();
+                s_stSpeed = s_stTemp = s_srSpeed = s_srSolar = s_trTemp = s_trSolar = Vector<double>();
+            }
 
-        /** @brief Retrieves the date of this reading
-         *  @return the Date stored in this record
-         */
-        Date GetDate() const;
+            // the function whose address is given to the tree
+            static void Visit( MetRecType & record )
+            {
+                // no month test needed: every tree handed to the traversal holds one month only
+                bool hasS = !record.IsSpeedMissing();
+                bool hasT = !record.IsTempMissing();
+                bool hasR = !record.IsSolarMissing();
 
-        /** @brief Retrieves the time of this reading
-         *  @return the Time stored in this record
-         */
-        Time GetTime() const;
+                if (hasS) s_speeds.Insert( s_speeds.Size(), record.GetSpeed() );
+                if (hasT) s_temperatures.Insert( s_temperatures.Size(), record.GetTemperature() );
+                if (hasR) s_solars.Insert( s_solars.Size(), record.GetSolarRadiation() );
 
-        /** @brief Retrieves the wind speed of this reading
-         *  @return the speed in km/h, or MISSING_SPEED if the sensor
-         *  was offline for this reading
-         */
-        float GetSpeed() const;
+                // pairs: both values must be valid, so the two lists stay matched
+                if (hasS && hasT)
+                {
+                    s_stSpeed.Insert( s_stSpeed.Size(), record.GetSpeed() );
+                    s_stTemp.Insert( s_stTemp.Size(), record.GetTemperature() );
+                }
+                if (hasS && hasR)
+                {
+                    s_srSpeed.Insert( s_srSpeed.Size(), record.GetSpeed() );
+                    s_srSolar.Insert( s_srSolar.Size(), record.GetSolarRadiation() );
+                }
+                if (hasT && hasR)
+                {
+                    s_trTemp.Insert( s_trTemp.Size(), record.GetTemperature() );
+                    s_trSolar.Insert( s_trSolar.Size(), record.GetSolarRadiation() );
+                }
+            }
 
-         /** @brief Retrieves the ambient air temperature of this reading
-         *  @return the temperature in degrees C, returns MISSING_TEMP if the
-         *   sensor was offline.
-         */
-        float GetTemperature() const;
+            static Vector<double> s_speeds, s_temperatures, s_solars;
+            static Vector<double> s_stSpeed, s_stTemp, s_srSpeed, s_srSolar, s_trTemp, s_trSolar;
+    };
 
-         /** @brief Retrieves the solar radiation of this reading
-         *  @return the solar radiation in W/m2,returns MISSING_SOLAR if the
-         *   sensor was offline.
-         */
-        float GetSolarRadiation() const;
+    Vector<double> Gatherer::s_speeds, Gatherer::s_temperatures, Gatherer::s_solars;
+    Vector<double> Gatherer::s_stSpeed, Gatherer::s_stTemp, Gatherer::s_srSpeed, Gatherer::s_srSolar,
+                   Gatherer::s_trTemp, Gatherer::s_trSolar;
 
-        /** @brief Sets the date of this reading
-         *  @param date the new date
-         */
-        void SetDate( const Date & date );
+    // Inserts items[low..high] middle-first so the tree stays balanced:
+    // the middle goes in first, then the middle of each half, and so on.
+    void InsertMiddleFirst( const std::vector<MetRecType> & items, int low, int high, Bst<MetRecType> & tree )
+    {
+        if (low > high)
+            return;
+        int middle = low + (high - low) / 2;
+        tree.insert( items[middle] );
+        InsertMiddleFirst( items, low, middle - 1, tree );
+        InsertMiddleFirst( items, middle + 1, high, tree );
+    }
 
-        /** @brief Sets the time of this reading
-         *  @param time the new time
-         */
-        void SetTime( const Time & time );
+    // The one place the cell key is built: March 2015 -> 201503 (year 1 to 9999, month 1 to 12).
+    int MakeKey( int year, int month )
+    {
+        return year * 100 + month;
+    }
 
-        /** @brief Sets the wind speed of this reading
-         *  @param speed the speed in km/h, or MISSING_SPEED if the sensor was offline
-         */
-        void SetSpeed( float speed );
+    // Collects the readings of one month of one year (an empty result if that cell does not exist).
+    void GatherCell( const Map<int, Bst<MetRecType> > & cells, int year, int month )
+    {
+        Gatherer::Start();
+        const Bst<MetRecType> * tree = cells.Find( MakeKey( year, month ) );
+        if (tree != nullptr)
+            tree->inorderTraversal( Gatherer::Visit );                  // pass the function, not a call
+    }
+}
 
-        /** @brief Sets the ambient air temperature of this reading
-         *  @param temperature the temperature in degrees C, or MISSING_TEMP
-         *   if the sensor was offline
-         */
-        void SetTemperature( float temperature );
+MetStore::MetStore() : m_cells()
+{
+}
 
-        /** @brief Sets the solar radiation of this reading
-         *  @param solarRadiation the solar radiation in W/m2, or MISSING_SOLAR
-         *   if the sensor was offline
-         */
-        void SetSolarRadiation( float solarRadiation );
+void MetStore::Load( const Metlog & metLog )
+{
+    m_cells = Map<int, Bst<MetRecType> >();
 
-        /** @brief Reports whether this reading's sensor was offline
-         *  @return true, if GetSpeed() is a tolerance value
-         */
-        // behaviour method to find anomalities if speed is missing
-        bool IsSpeedMissing() const;
+    std::vector<MetRecType> sorted;                                     // sorted needs random access, so a std::vector is used here
+    sorted.reserve( metLog.GetRecordCount() );
+    for (int counter = 0; counter < metLog.GetRecordCount(); counter++)
+        sorted.push_back( metLog.GetRecord( counter ) );
+    std::sort( sorted.begin(), sorted.end() );                         // by date, then time (operator< of MetRecType)
 
-         /** @brief Reports whether this reading's temperature is missing
-         *  @return true, if GetTemperature() is a tolerance value
-         */
-        bool IsTempMissing() const;
+    int total = static_cast<int>( sorted.size() );
+    int start = 0;
+    while (start < total)                                               // after sorting, each month is one run of records
+    {
+        int key = MakeKey( sorted[start].GetDate().GetYear(), sorted[start].GetDate().GetMonth() );
+        int end = start;
+        while (end < total && MakeKey( sorted[end].GetDate().GetYear(), sorted[end].GetDate().GetMonth() ) == key)
+            end++;
 
-         /** @brief Reports whether this reading's solar radiation is missing
-         *  @return true, if GetSolarRadiation() is a tolerance value
-         */
-        bool IsSolarMissing() const;
+        m_cells.Insert( key, Bst<MetRecType>() );
+        InsertMiddleFirst( sorted, start, end - 1, *m_cells.Find( key ) );
+        start = end;
+    }
+}
 
+int MetStore::GetYearCount() const
+{
+    Vector<int> keys = m_cells.Keys();
+    int years = 0;
+    for (int counter = 0; counter < keys.Size(); counter++)
+    {
+        bool seen = false;                                              // count a year only the first time one of its cells is met
+        for (int earlier = 0; earlier < counter; earlier++)
+            if (keys[earlier] / 100 == keys[counter] / 100)
+                seen = true;
+        if (!seen)
+            years++;
+    }
+    return years;
+}
 
-    private:
-        Date m_date;// composition from Date Class
-        Time m_time; //composition from Time Class
-        float m_speed;
-        float m_temperature;
-        float m_solar;
+int MetStore::GetReadingCount() const
+{
+    int total = 0;
+    Vector<int> keys = m_cells.Keys();
+    for (int counter = 0; counter < keys.Size(); counter++)
+        total += m_cells.Find( keys[counter] )->treeNodeCount();
+    return total;
+}
 
-};
+int MetStore::GetSpeedCount( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return Gatherer::s_speeds.Size();
+}
 
-/** @brief Orders two records by date, then by time, so records can be kept in a binary search tree.
- *  Two records with the same date and time count as the same reading (neither is smaller).
- *  @return true if left was taken before right */
-bool operator<( const MetRecType & left, const MetRecType & right );
+double MetStore::GetSpeedMean( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return Mean( Gatherer::s_speeds );
+}
 
-#endif
+double MetStore::GetSpeedStdDev( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return StdDev( Gatherer::s_speeds );
+}
+
+int MetStore::GetTemperatureCount( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return Gatherer::s_temperatures.Size();
+}
+
+double MetStore::GetTemperatureMean( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return Mean( Gatherer::s_temperatures );
+}
+
+double MetStore::GetTemperatureStdDev( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return StdDev( Gatherer::s_temperatures );
+}
+
+double MetStore::GetSpeedMad( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return Mad( Gatherer::s_speeds );
+}
+
+double MetStore::GetTemperatureMad( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return Mad( Gatherer::s_temperatures );
+}
+
+int MetStore::GetSolarCount( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    return Gatherer::s_solars.Size();
+}
+
+double MetStore::GetSolarTotal( int month, int year ) const
+{
+    GatherCell( m_cells, year, month );
+    double sum = 0;                                                     // W/m2, summed over the valid readings
+    for (int counter = 0; counter < Gatherer::s_solars.Size(); counter++)
+        sum += Gatherer::s_solars[counter];
+    return sum * HOURS_PER_READING / 1000;                              // W/m2 x hours / 1000 = kWh/m2
+}
+
+MetStore::Correlations MetStore::GetCorrelations( int month ) const
+{
+    Gatherer::Start();
+    Vector<int> keys = m_cells.Keys();
+    for (int counter = 0; counter < keys.Size(); counter++)             // every cell; only those of this month are used
+        if (keys[counter] % 100 == month)
+            m_cells.Find( keys[counter] )->inorderTraversal( Gatherer::Visit );
+
+    Correlations result;
+    result.st = sPCC( Gatherer::s_stSpeed, Gatherer::s_stTemp );
+    result.sr = sPCC( Gatherer::s_srSpeed, Gatherer::s_srSolar );
+    result.tr = sPCC( Gatherer::s_trTemp, Gatherer::s_trSolar );
+    result.stPairs = Gatherer::s_stSpeed.Size();
+    result.srPairs = Gatherer::s_srSpeed.Size();
+    result.trPairs = Gatherer::s_trTemp.Size();
+    return result;
+}
