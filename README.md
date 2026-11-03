@@ -1,8 +1,8 @@
 ## ICT283 Assignment 2 (Version 3.0): Weather Data Programme
 
 ## Includes
-Lab 8: Reading from data file using DataSource programme
-Lab 10 Qns d and e : sPCC Calculation, MAD Calculation
+Lab 8: Reading from data file using DataSource programme   
+Lab 10 Qns D and E : sPCC Calculation, MAD Calculation
 Lab 11: Implementation of Menu Option 3 and 4
 
 
