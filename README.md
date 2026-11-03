@@ -2,7 +2,7 @@
 
 ## Includes
 Lab 8: Reading from data file using DataSource programme   
-Lab 10 Qns D and E : sPCC Calculation, MAD Calculation
+Lab 10 Qns D and E : sPCC Calculation, MAD Calculation   
 Lab 11: Implementation of Menu Option 3 and 4
 
 
