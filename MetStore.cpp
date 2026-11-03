@@ -13,7 +13,7 @@ namespace
 {
     const double HOURS_PER_READING = 10.0 / 60.0;                      // one reading is the average power over 10 minutes
 
-    class Gatherer
+    class Gather
     {
         public:
             static void Start()
@@ -58,9 +58,9 @@ namespace
             static Vector<double> s_stSpeed, s_stTemp, s_srSpeed, s_srSolar, s_trTemp, s_trSolar;
     };
 
-    Vector<double> Gatherer::s_speeds, Gatherer::s_temperatures, Gatherer::s_solars;
-    Vector<double> Gatherer::s_stSpeed, Gatherer::s_stTemp, Gatherer::s_srSpeed, Gatherer::s_srSolar,
-                   Gatherer::s_trTemp, Gatherer::s_trSolar;
+    Vector<double> Gather::s_speeds, Gather::s_temperatures, Gather::s_solars;
+    Vector<double> Gather::s_stSpeed, Gather::s_stTemp, Gather::s_srSpeed, Gather::s_srSolar,
+                   Gather::s_trTemp, Gather::s_trSolar;
 
     // Inserts items[low..high] middle-first so the tree stays balanced:
     // the middle goes in first, then the middle of each half, and so on.
