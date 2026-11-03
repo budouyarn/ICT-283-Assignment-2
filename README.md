@@ -21,7 +21,7 @@ Reads weather readings (one reading every 10 minutes) from CSV files, then answe
 -**Option 5:** Wind speed summary of the whole file, and the readings that match the average.
 
 -**Option 0:** Exit	
-## ------------------------------------------------------------------
+------------------------------------------------------------------
 
 **Example of the file written by Option 4 :**
 
