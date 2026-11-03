@@ -83,10 +83,10 @@ namespace
     // Collects the readings of one month of one year (an empty result if that cell does not exist).
     void GatherCell( const Map<int, Bst<MetRecType> > & cells, int year, int month )
     {
-        Gatherer::Start();
+        Gather::Start();
         const Bst<MetRecType> * tree = cells.Find( MakeKey( year, month ) );
         if (tree != nullptr)
-            tree->inorderTraversal( Gatherer::Visit );                  // pass the function, not a call
+            tree->inorderTraversal( Gather::Visit );                  // pass the function, not a call
     }
 }
 
@@ -147,80 +147,80 @@ int MetStore::GetReadingCount() const
 int MetStore::GetSpeedCount( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return Gatherer::s_speeds.Size();
+    return Gather::s_speeds.Size();
 }
 
 double MetStore::GetSpeedMean( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return Mean( Gatherer::s_speeds );
+    return Mean( Gather::s_speeds );
 }
 
 double MetStore::GetSpeedStdDev( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return StdDev( Gatherer::s_speeds );
+    return StdDev( Gather::s_speeds );
 }
 
 int MetStore::GetTemperatureCount( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return Gatherer::s_temperatures.Size();
+    return Gather::s_temperatures.Size();
 }
 
 double MetStore::GetTemperatureMean( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return Mean( Gatherer::s_temperatures );
+    return Mean( Gather::s_temperatures );
 }
 
 double MetStore::GetTemperatureStdDev( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return StdDev( Gatherer::s_temperatures );
+    return StdDev( Gather::s_temperatures );
 }
 
 double MetStore::GetSpeedMad( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return Mad( Gatherer::s_speeds );
+    return Mad( Gather::s_speeds );
 }
 
 double MetStore::GetTemperatureMad( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return Mad( Gatherer::s_temperatures );
+    return Mad( Gather::s_temperatures );
 }
 
 int MetStore::GetSolarCount( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    return Gatherer::s_solars.Size();
+    return Gather::s_solars.Size();
 }
 
 double MetStore::GetSolarTotal( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
     double sum = 0;                                                     // W/m2, summed over the valid readings
-    for (int counter = 0; counter < Gatherer::s_solars.Size(); counter++)
-        sum += Gatherer::s_solars[counter];
+    for (int counter = 0; counter < Gather::s_solars.Size(); counter++)
+        sum += Gather::s_solars[counter];
     return sum * HOURS_PER_READING / 1000;                              // W/m2 x hours / 1000 = kWh/m2
 }
 
 MetStore::Correlations MetStore::GetCorrelations( int month ) const
 {
-    Gatherer::Start();
+    Gather::Start();
     Vector<int> keys = m_cells.Keys();
     for (int counter = 0; counter < keys.Size(); counter++)             // every cell; only those of this month are used
         if (keys[counter] % 100 == month)
-            m_cells.Find( keys[counter] )->inorderTraversal( Gatherer::Visit );
+            m_cells.Find( keys[counter] )->inorderTraversal( Gather::Visit );
 
     Correlations result;
-    result.st = sPCC( Gatherer::s_stSpeed, Gatherer::s_stTemp );
-    result.sr = sPCC( Gatherer::s_srSpeed, Gatherer::s_srSolar );
-    result.tr = sPCC( Gatherer::s_trTemp, Gatherer::s_trSolar );
-    result.stPairs = Gatherer::s_stSpeed.Size();
-    result.srPairs = Gatherer::s_srSpeed.Size();
-    result.trPairs = Gatherer::s_trTemp.Size();
+    result.st = sPCC( Gather::s_stSpeed, Gather::s_stTemp );
+    result.sr = sPCC( Gather::s_srSpeed, Gather::s_srSolar );
+    result.tr = sPCC( Gather::s_trTemp, Gather::s_trSolar );
+    result.stPairs = Gather::s_stSpeed.Size();
+    result.srPairs = Gather::s_srSpeed.Size();
+    result.trPairs = Gather::s_trTemp.Size();
     return result;
 }

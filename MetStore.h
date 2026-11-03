@@ -12,7 +12,7 @@
  *
  *   Map<int year, Bst<MetRecType>>
  *
- * Why this arrangement (the full reasoning is in the written justification):
+ * Method usage:
  *  - A menu question about one month of one year goes straight to that year's tree (Map::Find)
  *    and never looks at the other years.
  *  - A question about one month across all years visits each year's tree in turn (Map::Keys).
@@ -26,9 +26,9 @@
  * so the figures are gathered by a small helper class with static members (see MetStore.cpp).
  *
  * @class MetStore
- * @author  Lim Wen Xin Sherine
+ * @author Lim Wen Xin Sherine
  * @version 1.0
- * @date    01/11/2026
+ * @date 01/11/2026
  */
 class MetStore
 {

@@ -16,9 +16,8 @@ double Mean( const Vector<double> & values );
  * @return the standard deviation, or 0 if there are fewer than 2 values
  */
 double StdDev( const Vector<double> & values );
-
 /**
- * @brief Mean Absolute Deviation of ungrouped data: the mean of |x - mean|.
+ * @brief Mean Absolute Deviation of ungrouped data: the mean of |first - mean|.
  * It works on plain numbers, so it knows nothing about weather data.
  * @param values: the numbers
  * @return the mean absolute deviation, 0 if there are no values
@@ -29,7 +28,7 @@ double Mad( const Vector<double> & values );
  * @brief Pearson Correlation Coefficient between two sets of values, matched pair by pair
  * Result is between -1 (perfect opposite) and +1 (perfect match), 0 means no straight-line relationship.
  *
- *   sPCC = sum( (first - meanX)(second - meanY) ) / sqrt( sum( (first - meanX)^2 ) * sum( (second - meanY)^2 ) )
+ *   sPCC = sum( (first - mean1)(second - meanY) ) / sqrt( sum( (first - mean1)^2 ) * sum( (second - meanY)^2 ) )
  *
  * It is undefined, so NaN is returned, when
  *   - the two Vectors are not the same length,
