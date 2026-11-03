@@ -11,7 +11,7 @@
 // ---------------------------------------------------------------------------------------------
 namespace
 {
-    const double HOURS_PER_READING = 10.0 / 60.0;                      // one reading is the average power over 10 minutes
+    const double HOURS_PER_READING = 10.0 / 60.0; // one reading is the average power over 10 minutes
 
     class Gather
     {
@@ -28,26 +28,26 @@ namespace
             static void Visit( MetRecType & record )
             {
                 // no month test needed: every tree handed to the traversal holds one month only
-                bool hasS = !record.IsSpeedMissing();
-                bool hasT = !record.IsTempMissing();
-                bool hasR = !record.IsSolarMissing();
+                bool hasSpeed = !record.IsSpeedMissing();
+                bool hasTemp = !record.IsTempMissing();
+                bool hasRad = !record.IsSolarMissing();
 
-                if (hasS) s_speeds.Insert( s_speeds.Size(), record.GetSpeed() );
-                if (hasT) s_temperatures.Insert( s_temperatures.Size(), record.GetTemperature() );
-                if (hasR) s_solars.Insert( s_solars.Size(), record.GetSolarRadiation() );
+                if (hasSpeed) s_speeds.Insert( s_speeds.Size(), record.GetSpeed() );
+                if (hasTemp) s_temperatures.Insert( s_temperatures.Size(), record.GetTemperature() );
+                if (hasRad) s_solars.Insert( s_solars.Size(), record.GetSolarRadiation() );
 
                 // pairs: both values must be valid, so the two lists stay matched
-                if (hasS && hasT)
+                if (hasSpeed && hasTemp)
                 {
                     s_stSpeed.Insert( s_stSpeed.Size(), record.GetSpeed() );
                     s_stTemp.Insert( s_stTemp.Size(), record.GetTemperature() );
                 }
-                if (hasS && hasR)
+                if (hasSpeed && hasRad)
                 {
                     s_srSpeed.Insert( s_srSpeed.Size(), record.GetSpeed() );
                     s_srSolar.Insert( s_srSolar.Size(), record.GetSolarRadiation() );
                 }
-                if (hasT && hasR)
+                if (hasTemp && hasRad)
                 {
                     s_trTemp.Insert( s_trTemp.Size(), record.GetTemperature() );
                     s_trSolar.Insert( s_trSolar.Size(), record.GetSolarRadiation() );
@@ -86,7 +86,7 @@ namespace
         Gather::Start();
         const Bst<MetRecType> * tree = cells.Find( MakeKey( year, month ) );
         if (tree != nullptr)
-            tree->inorderTraversal( Gather::Visit );                  // pass the function, not a call
+            tree->inorderTraversal( Gather::Visit ); // pass the function, not a call
     }
 }
 
@@ -98,15 +98,15 @@ void MetStore::Load( const Metlog & metLog )
 {
     m_cells = Map<int, Bst<MetRecType> >();
 
-    std::vector<MetRecType> sorted;                                     // sorted needs random access, so a std::vector is used here
+    std::vector<MetRecType> sorted; // sorted needs random access, so a std::vector is used here
     sorted.reserve( metLog.GetRecordCount() );
     for (int counter = 0; counter < metLog.GetRecordCount(); counter++)
         sorted.push_back( metLog.GetRecord( counter ) );
-    std::sort( sorted.begin(), sorted.end() );                         // by date, then time (operator< of MetRecType)
+    std::sort( sorted.begin(), sorted.end() );// by date, then time (operator< of MetRecType)
 
     int total = static_cast<int>( sorted.size() );
     int start = 0;
-    while (start < total)                                               // after sorting, each month is one run of records
+    while (start < total) // after sorting, each month is one run of records
     {
         int key = MakeKey( sorted[start].GetDate().GetYear(), sorted[start].GetDate().GetMonth() );
         int end = start;
@@ -125,7 +125,7 @@ int MetStore::GetYearCount() const
     int years = 0;
     for (int counter = 0; counter < keys.Size(); counter++)
     {
-        bool seen = false;                                              // count a year only the first time one of its cells is met
+        bool seen = false;// count a year only the first time one of its cells is met
         for (int earlier = 0; earlier < counter; earlier++)
             if (keys[earlier] / 100 == keys[counter] / 100)
                 seen = true;
