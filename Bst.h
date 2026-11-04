@@ -19,7 +19,7 @@
  * @class Bst
  * @author  Lim Wen Xin Sherine
  * @version 2.0
- * @date    01/11/2026
+ * @date 01/11/2026
  */
 template <class T>
 class Bst
@@ -78,7 +78,8 @@ class Bst
          * Calls visit once for every value.
          * @param visit: nodePointer to the client's function, called with each value in turn
          */
-        void inorderTraversal( void (*visit)( T & item ) ) const;
+        void inorderTraversal( void (*visit)( T & item ) ) const; // A function pointer like void (*visit)(T &) only stores a memory address to executable instructions.
+        //It knows nothing about which object instance called it.
 
         /**
          * @brief Pre-order traversal: node, left subtree, right subtree.
@@ -139,7 +140,7 @@ class Bst
         nodeType * root;/**< the top node of the tree, nullptr when the tree is empty */
 
         // The recursive helpers. Each one works on the subtree that starts at nodePointer.
-        static nodeType * insertNode( nodeType * nodePointer, const T & insertItem, bool & inserted );
+       static bool insertNode( nodeType * & nodePointer, const T & insertItem );
         static bool searchNode( const nodeType * nodePointer, const T & searchItem );//back tracks into how it was inserted, top down waterfall following BST rules
         static void copyTree( nodeType * & copiedTreeRoot, const nodeType * otherTreeRoot );// Copy constructed tree
         static void destroy( nodeType * & nodePointer );// Copy constructed tree
@@ -191,9 +192,7 @@ bool Bst<T>::isEmpty() const
 template <class T>
 bool Bst<T>::insert( const T & insertItem )
 {
-    bool inserted = false;// insertNode sets this to true only if a new node is made
-    root = insertNode( root, insertItem, inserted );
-    return inserted;
+    return insertNode( root, insertItem );   // root is passed by reference, so a new first node becomes the root
 }
 
 template <class T>
@@ -350,3 +349,4 @@ bool Bst<T>::checkNode( const nodeType * nodePointer, const T * low, const T * h
 }
 
 #endif // BST_H
+
