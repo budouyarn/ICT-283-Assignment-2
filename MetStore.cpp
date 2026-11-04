@@ -17,14 +17,17 @@ namespace
     {
         public:
             static void Start()
+            //Bad:static members for callbacks is that if a function ever recursively calls another function that also invokes Gather::Start()
+            // if multi-threading is introduced, the state can get overwritten.
             {
                 s_speeds = Vector<double>();
                 s_temperatures = Vector<double>();
                 s_solars = Vector<double>();
                 s_stSpeed = s_stTemp = s_srSpeed = s_srSolar = s_trTemp = s_trSolar = Vector<double>();
+                //The vectors are re-instantiated fresh (s_speeds = Vector<double>();) ensuring old data from previous calls is wiped out.
             }
 
-            // the function whose address is given to the tree
+            // plain function pointer cannot carry state because it only knows about the function address and not the object instance
             static void Visit( MetRecType & record )
             {
                 // no month test needed: every tree handed to the traversal holds one month only
@@ -62,7 +65,7 @@ namespace
     Vector<double> Gather::s_stSpeed, Gather::s_stTemp, Gather::s_srSpeed, Gather::s_srSolar,
                    Gather::s_trTemp, Gather::s_trSolar;
 
-    // Inserts items[low..high] middle-first so the tree stays balanced:
+    // Inserts items[low,high] middle-first so the tree stays balanced easily:
     // the middle goes in first, then the middle of each half, and so on.
     void InsertMiddleFirst( const std::vector<MetRecType> & items, int low, int high, Bst<MetRecType> & tree )
     {
@@ -201,17 +204,17 @@ int MetStore::GetSolarCount( int month, int year ) const
 double MetStore::GetSolarTotal( int month, int year ) const
 {
     GatherCell( m_cells, year, month );
-    double sum = 0;                                                     // W/m2, summed over the valid readings
+    double sum = 0; // W/m2, summed over the valid readings
     for (int counter = 0; counter < Gather::s_solars.Size(); counter++)
         sum += Gather::s_solars[counter];
-    return sum * HOURS_PER_READING / 1000;                              // W/m2 x hours / 1000 = kWh/m2
+    return sum * HOURS_PER_READING / 1000; // W/m2 x hours / 1000 = kWh/m2
 }
 
 MetStore::Correlations MetStore::GetCorrelations( int month ) const
 {
     Gather::Start();
     Vector<int> keys = m_cells.Keys();
-    for (int counter = 0; counter < keys.Size(); counter++)             // every cell; only those of this month are used
+    for (int counter = 0; counter < keys.Size(); counter++)// every cell; only those of this month are used
         if (keys[counter] % 100 == month)
             m_cells.Find( keys[counter] )->inorderTraversal( Gather::Visit );
 
