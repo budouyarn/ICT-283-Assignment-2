@@ -12,7 +12,7 @@
 namespace
 {
     const double HOURS_PER_READING = 10.0 / 60.0; // one reading is the average power over 10 minutes
-
+//Using C style call-back
     class Gather
     {
         public:
@@ -26,11 +26,15 @@ namespace
                 s_stSpeed = s_stTemp = s_srSpeed = s_srSolar = s_trTemp = s_trSolar = Vector<double>();
                 //The vectors are re-instantiated fresh (s_speeds = Vector<double>();) ensuring old data from previous calls is wiped out.
             }
+// plain function pointer cannot carry state because it only knows about the function address and not the object instance
 
-            // plain function pointer cannot carry state because it only knows about the function address and not the object instance
+            //pass Gather::Visit, a static member function.
+            //A static member function, has the same type as an ordinary free function. That is why it can be passed as a function pointer.
+            //The tree calls it once per reading with only the reading as an argument.
+            //The function can give any other data, which is why Gather keeps its lists in static variables.
             static void Visit( MetRecType & record )
             {
-                // no month test needed: every tree handed to the traversal holds one month only
+                // read only check
                 bool hasSpeed = !record.IsSpeedMissing();
                 bool hasTemp = !record.IsTempMissing();
                 bool hasRad = !record.IsSolarMissing();
@@ -60,7 +64,7 @@ namespace
             static Vector<double> s_speeds, s_temperatures, s_solars;
             static Vector<double> s_stSpeed, s_stTemp, s_srSpeed, s_srSolar, s_trTemp, s_trSolar;
     };
-
+//Static data members of a class always be defined.
     Vector<double> Gather::s_speeds, Gather::s_temperatures, Gather::s_solars;
     Vector<double> Gather::s_stSpeed, Gather::s_stTemp, Gather::s_srSpeed, Gather::s_srSolar,
                    Gather::s_trTemp, Gather::s_trSolar;
