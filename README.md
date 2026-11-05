@@ -21,7 +21,7 @@ Reads weather readings (one reading every 10 minutes) from CSV files, then answe
 -**Option 5:** Wind speed summary of the whole file, and the readings that match the average.
 
 -**Option 0:** Exit	
-------------------------------------------------------------------
+---
 
 **Example of the file written by Option 4 :**
 
@@ -31,7 +31,7 @@ February,11.28(4.98, 4.02),29.39(2.98, 2.56),131.73
 
 A value shows N/A when a month has no valid readings, and the standard deviation shows N/A when there is only one. Option 3 shows "not available" for a coefficient that cannot be calculated (fewer than 2 matching readings, or a value that never varies).
 
-## ---------------------------------------------------------------
+---
 ## How to run
 
 1) Open Assignment 2.cbp on code::blocks
