@@ -4,6 +4,7 @@
  * Needs MetStore, Metlog, MetRecType, Date, Time, Stats (and their headers) in the same build.
  */
 #include <iostream>
+#include <cstdlib>
 #include <cmath>
 #include <string>
 #include "MetStore.h"
@@ -13,20 +14,29 @@ using std::cout;
 using std::endl;
 using std::string;
 
-static int failed = 0;///< number of checks that did not hold
+static int testNumber = 0;///< which test is running
 
 /**
- * @brief Prints FAIL when a check does not hold.
- * @param condition: true if the check holds
- * @param what: description of the check
+ * @brief Runs one test: prints PASS and lets the next test run, or prints FAIL and stops the whole run.
+ * Stopping at the first failure means a later line never uses a result that is already known to be wrong
+ * (for example a pointer that Find returned as nullptr).
+ * @param condition: true if the test holds
+ * @param what: description of the test
+ * @param detail: what was expected and what was found (printed only on FAIL)
  */
-static void check( bool condition, const string & what )
+static void check( bool condition, const string & what, const string & detail = "" )
 {
-    if (!condition)
+    testNumber++;
+    if (condition)
     {
-        failed++;
-        cout << "FAIL: " << what << endl;
+        cout << "Test " << testNumber << ": " << what << " ... PASS" << endl;
+        return;
     }
+    cout << "Test " << testNumber << ": " << what << " ... FAIL" << endl;
+    if (!detail.empty())
+        cout << "    " << detail << endl;
+    cout << "Stopped at test " << testNumber << ", the later tests were not run" << endl;
+    exit( 1 );
 }
 
 /**
@@ -50,7 +60,7 @@ static void add( Metlog & log, int day, int month, int year, int hour, int minut
 
 /**
  * @brief Runs the checks.
- * @return 0 if every check held, 1 otherwise
+ * @return 0 if every test passed (the run stops at the first failure)
  */
 int main()
 {
@@ -64,8 +74,8 @@ int main()
     add( log, 1, 1, 2015, 0, 10, 60, 6, MISSING_SOLAR );  // Jan 2015, solar missing
     add( log, 1, 1, 2014, 0, 20, 30, 3, 300 ); // Jan 2014
     add( log, 1, 1, 2015, 0, 20, 70, 8, 650 ); // Jan 2015
-    add( log, 1, 1, 2014, 0, 0, 10, 1, 100 );// Jan 2014
-    add( log, 2, 1, 2014, 0, 0, MISSING_SPEED, 5, 500 ); // Jan 2014, speed missing
+    add( log, 1, 1, 2014, 0, 0, 10, 1, 100 ); // Jan 2014
+    add( log, 2, 1, 2014, 0, 0, MISSING_SPEED, 5, 500 );// Jan 2014, speed missing
     add( log, 1, 1, 2014, 0, 10, 20, 2, 200 );// Jan 2014
     add( log, 1, 1, 2014, 0, 0, 10, 1, 100 );// exact copy of the 4th record
 
@@ -83,11 +93,8 @@ int main()
     // a month with no readings
     check( store.GetSpeedCount( 2, 2014 ) == 0, "Feb 2014: no readings" );
 
-     if (failed == 0)
-    {
-        cout << "All checks passed" << endl;
-        return 0;
-    }
-    cout << failed << " check(s) failed" << endl;
-    return 1;
+    cout << "All " << testNumber << " tests passed" << endl;
+    return 0;
 }
+
+ 
