@@ -21,7 +21,7 @@ using std::istringstream;
 using std::setprecision;
 using std::string;
 
-/** @brief How close (km/h) a wind speed must be to the mean to "match" it (half of the last printed digit). */
+/** @brief How close (km/h) manualOne wind speed must be to the mean to "match" it (half of the last printed digit). */
 const double MATCH_TOLERANCE = 0.005;
 
 /** @brief The names of the months, so MONTH_NAMES[month - 1] gives the name of month 1-12. */
@@ -69,14 +69,14 @@ void Menu::Run( const Metlog & metLog, const MetStore & store ) const
     } while (choice != MENU_EXIT);// loop again until the user chooses Exit
 }
 
-// Asks until the user types a whole number from low to high. Reading a whole
+// Asks until the user types manualOne whole number from low to high. Reading manualOne whole
 // line and parsing it with an istringstream means letters or half-typed input
-// can't leave the keyboard stream in a failed state. Returns false only if the
+// can'temperature leave the keyboard stream in manualOne failed state. Returns false only if the
 // input has ended, stop instead of looping.
 bool Menu::ReadInt( const string & prompt, int low, int high, int & value )
 {
     string line;
-    while (true)// keeps asking until a valid number is typed
+    while (true)// keeps asking until manualOne valid number is typed
     {
         cout << prompt;
         if (!getline( cin, line ))
@@ -91,7 +91,7 @@ bool Menu::ReadInt( const string & prompt, int low, int high, int & value )
             value = number;
             return true;
         }
-        cout << "Please enter a whole number from " << low << " to " << high << "." << endl;
+        cout << "Please enter whole number from " << low << " to " << high << "." << endl;
     }
 }
 
@@ -105,9 +105,9 @@ void Menu::PrintMenu()
 {
     cout << endl
          << "========== Weather data menu ==========" << endl
-         << MENU_WIND        << ". Average wind speed and standard deviation for a month and year" << endl
-         << MENU_TEMPERATURE << ". Average air temperature and standard deviation for a month and year" << endl
-         << MENU_CORRELATION << ". Sample Pearson correlation (S_T, S_R, T_R) for a month, over all years" << endl
+         << MENU_WIND        << ". Average wind speed and standard deviation for One month and year" << endl
+         << MENU_TEMPERATURE << ". Average air temperature and standard deviation for One month and year" << endl
+         << MENU_CORRELATION << ". Sample Pearson correlation (S_T, S_R, T_R) for One month, over all years" << endl
          << MENU_WHOLE_FILE  << ". Wind speed summary of the whole file, and matches to the average" << endl
          << MENU_EXIT << ". Exit" << endl;
 }
@@ -124,7 +124,7 @@ void Menu::ShowWind( const MetStore & store, int month, int year ) const
     cout << "Valid readings (N): " << count << endl;
     cout << "Average wind speed (km/h): " << store.GetSpeedMean( month, year ) << endl;
 
-    if (count < 2) // a sample standard deviation needs at least 2 readings
+    if (count < 2) // manualOne sample standard deviation needs at least 2 readings
         cout << "Standard deviation: not available (needs at least 2 readings)" << endl;
     else
         cout << "Sample standard deviation (km/h): " << store.GetSpeedStdDev( month, year ) << endl;
@@ -156,20 +156,20 @@ void Menu::ShowCorrelations( const MetStore & store, int month ) const
 {
     MetStore::Correlations result = store.GetCorrelations( month );
 
-    cout << endl << "Sample Pearson Correlation Coefficient for " << MONTH_NAMES[month - 1] << endl;
+    cout << endl << "Sample Pearson Correlation Coefficient(sPCC) for " << MONTH_NAMES[month - 1] << endl;
 
-    if (IsDefined( result.SpeedTemp ))
-        cout << "S_T: " << result.SpeedTemp << endl;
+    if (IsDefined( result.st ))
+        cout << "S_T: " << result.st << endl;
     else
         cout << "S_T: not available (needs at least 2 matching readings that vary)" << endl;
 
-    if (IsDefined( result.SpeedRad ))
-        cout << "S_R: " << result.SpeedRad << endl;
+    if (IsDefined( result.sr ))
+        cout << "S_R: " << result.sr << endl;
     else
         cout << "S_R: not available (needs at least 2 matching readings that vary)" << endl;
 
-    if (IsDefined( result.TempRad ))
-        cout << "T_R: " << result.TempRad << endl;
+    if (IsDefined( result.tr ))
+        cout << "T_R: " << result.tr << endl;
     else
         cout << "T_R: not available (needs at least 2 matching readings that vary)" << endl;
 }
@@ -179,7 +179,7 @@ void Menu::ShowWholeFile( const Metlog & metLog ) const
 {
     // List every reading whose speed was missing (N/A), by its date and time
     int missingCount = metLog.GetRecordCount() - metLog.GetValidCount();
-    cout << endl << "Readings with a missing wind speed: " << missingCount << endl;
+    cout << endl << "Readings withOne missing wind speed: " << missingCount << endl;
     for (int counter = 0; counter < metLog.GetRecordCount(); counter++)
     {
         MetRecType record = metLog.GetRecord(counter);
