@@ -1,13 +1,10 @@
 #include "Stats.h"
 #include <cmath>
-#include <limits>
-
-using namespace std;
 
 double Mean( const Vector<double> & values )
 {
     if (values.Size() == 0)
-        return 0;  // avoids dividing by zero
+        return 0;                                  // avoids dividing by zero
 
     double sum = 0;
     for (int counter = 0; counter < values.Size(); counter++)
@@ -18,7 +15,7 @@ double Mean( const Vector<double> & values )
 double StdDev( const Vector<double> & values )
 {
     if (values.Size() < 2)
-        return 0; // n - 1 would be 0 or negative
+        return 0;                                  // n - 1 would be 0 or negative
 
     double mean = Mean( values );
     double squaredDiffs = 0;
@@ -33,38 +30,38 @@ double StdDev( const Vector<double> & values )
 double Mad( const Vector<double> & values )
 {
     if (values.Size() == 0)
-        return 0;// avoids dividing by zero
+        return 0;                                  // avoids dividing by zero
 
     double mean = Mean( values );
     double sumOfDistances = 0;
     for (int counter = 0; counter < values.Size(); counter++)
-        sumOfDistances += std::fabs( values[counter] - mean ); // distance from the mean, never negative
+        sumOfDistances += std::fabs( values[counter] - mean );   // distance from the mean, never negative
     return sumOfDistances / values.Size();
 }
 
-double sPCC( const Vector<double> & first, const Vector<double> & second )
+double sPCC( const Vector<double> & x, const Vector<double> & y )
 {
-    const double UNDEFINED = std::numeric_limits<double>::quiet_NaN();
+    const double UNDEFINED = std::nan( "" );   // a "not a number" value, from <cmath>
 
-    if (first.Size() != second.Size() || first.Size() < 2)
+    if (x.Size() != y.Size() || x.Size() < 2)
         return UNDEFINED;
 
-    double meanX = Mean( first );
-    double meanY = Mean( second );
+    double meanX = Mean( x );
+    double meanY = Mean( y );
 
-    double sumXY = 0; // sum of (first - meanX)(second - meanY)
-    double sumXX = 0; // sum of (first - meanX)^2
-    double sumYY = 0; // sum of (second - meanY)^2
-    for (int counter = 0; counter < first.Size(); counter++)
+    double sumXY = 0;// sum of (x - meanX)(y - meanY)
+    double sumXX = 0;// sum of (x - meanX)^2
+    double sumYY = 0; // sum of (y - meanY)^2
+    for (int counter = 0; counter < x.Size(); counter++)
     {
-        double deviation = first[counter] - meanX;
-        double deviation2 = second[counter] - meanY;
-        sumXY += deviation * deviation2;
-        sumXX += deviation * deviation;
-        sumYY += deviation2 * deviation2;
+        double dx = x[counter] - meanX;
+        double dy = y[counter] - meanY;
+        sumXY += dx * dy;
+        sumXX += dx * dx;
+        sumYY += dy * dy;
     }
 
-    if (sumXX <= 0 || sumYY <= 0)  // one set never varies: nothing to correlate
+    if (sumXX <= 0 || sumYY <= 0)// one set never varies: nothing to correlate
         return UNDEFINED;
 
     return sumXY / std::sqrt( sumXX * sumYY );
