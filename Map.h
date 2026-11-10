@@ -10,15 +10,14 @@
  * back the value/record stored for that key.
  *
  * Duplicate keys are NOT allowed (following the idea of third normal form in an SQL database):
- * a key holds at most one value.
+ * a key must at least hold one value.
  *
  * The Map wraps std::map and shows only what the programme needs, so nothing std::map specific
  *  appears in its public interface.
  *
  *
  *
- * @tparam Key the type of the key (must support operator<, so the keys can be kept in order)
- * @tparam Value the type of the value (must be copyable, because Insert stores a copy)
+ *
  *
  * @author Lim Wen Xin Sherine
  * @version 1.0
@@ -87,11 +86,15 @@ Map<Key, Value>::Map()
 template <class Key, class Value>
 bool Map<Key, Value>::Insert( const Key & key, const Value & value )
 {
-    return m_map.insert( std::pair<const Key, Value>( key, value ) ).second;   // .second is false if the key was already there
+    if (m_map.count( key ) != 0)// the key is already in the Map
+        return false; // so nothing is inserted, and the old value is kept
+
+    m_map[key] = value;// the key is new
+    return true;
 }
 
 /**
- * @brief Looks the key up and returns a pointer to its stored value.
+ * @brief Looks the key up and returns a pointer to its stored value. Used for actual mapping, there is a return value
  * @param key: the key to look for
  * @return a pointer to the value, or nullptr if the key is not in the Map
  */
@@ -101,11 +104,11 @@ Value * Map<Key, Value>::Find( const Key & key )
     if (m_map.count( key ) == 0)// return false if there is no key
     return nullptr;
 
-return &m_map[key];// it is true
+return &m_map[key];// map key exists, return it
 }
 
 /**
- * @brief Const version of Find: the returned pointer cannot be used to change the value.
+ * @brief Const version of Find: read only function
  * @param key: the key to look for
  * @return a pointer to the value, or nullptr if the key is not in the Map
  */
@@ -115,7 +118,7 @@ const Value * Map<Key, Value>::Find( const Key & key ) const
     if (m_map.count( key ) == 0)
     return nullptr;
 
-return &m_map.at( key );
+return &m_map.at( key );// finds out where the key resides at, only return location.value not to be used for anything
 }
 
 /**

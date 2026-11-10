@@ -18,7 +18,6 @@ Reads weather readings (one reading every 10 minutes) from CSV files, then answe
 
 -**Option 4:** Writes output WindTempSolar.csv: for every month of a year, the average wind speed and average temperature (each with (stdev, mad) next to it) and the total solar radiation in kWh/m2.
 
--**Option 5:** Wind speed summary of the whole file, and the readings that match the average.
 
 -**Option 0:** Exit	
 ---
@@ -47,6 +46,4 @@ Wind speed S is in m/s and is shown in km/h. N/A or blank values are treated as 
 
 4) When it starts the program prints how many readings each file gave and how many different readings were kept.
 
-## How it is built
 
-Map<int cell, Bst<MetRecType>>, where cell = year * 100 + month (March 2015 is 201503). Each (year, month) is one cell and holds that month's readings in a binary search tree, ordered by date and then time. The reasoning, advantages and disadvantages are in
