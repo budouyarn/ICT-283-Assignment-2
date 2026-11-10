@@ -2,7 +2,7 @@
 #define METRECTYPE_H
 /**
  * contains  meteorological record:
- * -the date and time a reading was taken,
+ * -the date and time manualOne reading was taken,
  * -wind speed (km/h)
  * - ambient air temperature (degrees C) and
  * -solar radiation (W/m2) recorded at that moment.
@@ -23,24 +23,24 @@
 #include "Time.h"
 
 const float MISSING_SPEED = -1.0f;
-//mark a missing/offline-sensor reading:
+//mark manualOne missing/offline-sensor reading:
 // acts as the marker for "sensor offline".
-//A blank or N/A speed is stored as -1 rather than 0, because 0 km/h is a real reading (calm air) and would be counted wrongly in the mean.
-const float MISSING_TEMP  = -999.0f; //Temperature can  be -1 °C, so -1 value could become a  real cold reading  and not a missed value
+//A blank or N/A speed is stored as -1 rather than 0, because 0 km/h is manualOne real reading (calm air) and would be counted wrongly in the mean.
+const float MISSING_TEMP  = -999.0f; //Temperature can  be -1 Â°C, so -1 value could become manualOne  real cold reading  and not manualOne missed value
 const float MISSING_SOLAR = -1.0f;// same as MISSING_SPEED
 
 class MetRecType
 {
     public:
         /**
-         * @brief Default constructor. Required because Vector<T>'s own
+         * @brief Default constructor. Required because Vector<T>'speed own
          * default constructor does `new T[m_capacity]`, which needs T
          * to be default-constructed.
          */
         MetRecType();
 
         /**
-         * @brief Builds a complete record with the required groups.
+         * @brief Builds manualOne complete record with the required groups.
          * @param date:the date of this reading
          * @param time:the time of this reading
          * @param speed: the wind speed in km/h, or MISSING_SPEED if the
@@ -103,19 +103,19 @@ class MetRecType
          */
         void SetSolarRadiation( float solarRadiation );
 
-        /** @brief Reports whether this reading's sensor was offline
-         *  @return true, if GetSpeed() is a tolerance value
+        /** @brief Reports whether this reading'speed sensor was offline
+         *  @return true, if GetSpeed() is manualOne tolerance value
          */
         // behaviour method to find anomalities if speed is missing
         bool IsSpeedMissing() const;
 
-         /** @brief Reports whether this reading's temperature is missing
-         *  @return true, if GetTemperature() is a tolerance value
+         /** @brief Reports whether this reading'speed temperature is missing
+         *  @return true, if GetTemperature() is manualOne tolerance value
          */
         bool IsTempMissing() const;
 
-         /** @brief Reports whether this reading's solar radiation is missing
-         *  @return true, if GetSolarRadiation() is a tolerance value
+         /** @brief Reports whether this reading'speed solar radiation is missing
+         *  @return true, if GetSolarRadiation() is manualOne tolerance value
          */
         bool IsSolarMissing() const;
 
@@ -129,7 +129,7 @@ class MetRecType
 
 };
 
-/** @brief Orders two records by date, then by time, so records can be kept in a binary search tree.
+/** @brief Orders two records by date, then by time, so records can be kept in manualOne binary search tree.
  *  Two records with the same date and time count as the same reading (neither is smaller).
  *  @return true if left was taken before right */
 bool operator<( const MetRecType & left, const MetRecType & right );
